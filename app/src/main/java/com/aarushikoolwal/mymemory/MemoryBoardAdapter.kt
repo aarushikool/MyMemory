@@ -10,22 +10,30 @@ import android.widget.ImageButton
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.aarushikoolwal.mymemory.models.BoardSize
+import com.aarushikoolwal.mymemory.models.MemoryCard
 import kotlin.math.min as min
 
- class MemoryBoardAdapter(
-    private val context: Context,
-    private val boardSize: BoardSize,
-    private val cardImages: List<Int>
+
+
+
+class MemoryBoardAdapter(
+     private val context: Context,
+     private val boardSize: BoardSize,
+     private val cards: List<MemoryCard>,
+     private val cardClickListener: CardClickListener
 ) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<MemoryBoardAdapter.ViewHolder>() {
 
     companion object{
         private const val MARGIN_SIZE =10
         private const val TAG ="MemoryAdapter"
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val cardWidth  = parent.width/boardSize.getWidth()- (2* MARGIN_SIZE)
-        val cardHeight = parent.height/boardSize.getHeight() - (2* MARGIN_SIZE)
+     interface CardClickListener{
+         fun onCardClicked(position: Int)
+     }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoryBoardAdapter.ViewHolder {
+        val cardWidth = parent.width / boardSize.getWidth() - 2 * MARGIN_SIZE
+        val cardHeight = parent.height / boardSize.getHeight() - 2 * MARGIN_SIZE
         val cardSideLength = min(cardWidth, cardHeight)
         val view = LayoutInflater.from(context).inflate(R.layout.memory_card, parent, false)
         val layoutParams= view.findViewById<CardView>(R.id.cardView).layoutParams as ViewGroup.MarginLayoutParams
@@ -35,20 +43,23 @@ import kotlin.math.min as min
         return ViewHolder(view)
     }
     override fun getItemCount() = boardSize.numCards
-     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
+     override fun onBindViewHolder(holder: MemoryBoardAdapter.ViewHolder, position: Int) {
          holder.bind(position)
      }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
               private val imageButton= itemView.findViewById<ImageButton>(R.id.imageButton)
 
               fun bind(position: Int){
-                  imageButton.setImageResource(cardImages[position])
+                  val memoryCard = cards[position]
+                  imageButton.setImageResource(if (memoryCard.isFaceUp) memoryCard.identifier else R.drawable.ic_launcher_background)
                   imageButton.setOnClickListener {
                       Log.i(TAG, "Clicked on $position")
+                      cardClickListener.onCardClicked(position)
                   }
               }
     }
 
-     
+
+
  }
